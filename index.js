@@ -1,38 +1,18 @@
 const express = require('express');
+
+const errorMiddleware = require('./middleware/error');
+
+const indexRouter = require('./routes/index');
+const bookRouter = require('./routes/book');
+
 const app = express();
-const port = 3000;
-const booksRouter = require('./routes/books');
-const userRouter = require('./routes/user');
+app.use(express.urlencoded());
+app.set("view engine", "ejs");
 
-// Middleware для обработки JSON
-app.use(express.json());
+app.use('/', indexRouter);
+app.use('/book', bookRouter);
 
-// Подключение роутов
-app.use('/api/books', booksRouter);
-app.use('/api/user', userRouter);
+app.use(errorMiddleware);
 
-// Роут для скачивания файла книги по id
-app.get('/api/books/:id/download', (req, res) => {
-    const bookId = req.params.id;
-    const book = books.find(book => book.id === bookId);
-    if (book) {
-      const filePath = `uploads/${book.fileBook}`;
-      res.download(filePath, book.fileName, (err) => {
-        if (err) {
-          res.status(500).json({ error: 'Ошибка загрузки файла' });
-        }
-      });
-    } else {
-      res.status(404).json({ error: 'Книга не найдена' });
-    }
-  });
-  
-// Обработчик маршрута для несуществующих маршрутов
-app.use((req, res) => {
-  res.status(404).json({ error: 'Страница не найдена' });
-});
-
-// Запуск сервера
-app.listen(port, () => {
-  console.log(`Сервер запущен на порту ${port}`);
-});
+const PORT = process.env.PORT || 3000;
+app.listen(PORT);
